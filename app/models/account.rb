@@ -45,6 +45,46 @@ class Account < ApplicationRecord
 
   enum status: STATUSES, _suffix: true
 
+  STATUSES.each do |key, _|
+    scope key, -> { where(status: key) }
+  end
+
+  def withdraw!(amount = 0)
+    transactions.create!(
+      amount: amount,
+      type: Transaction::TYPES[:debit],
+      event: Transaction::EVENTS[:withdrawal]
+    )
+  end
+
+  def deposit!(amount = 0)
+    transactions.create!(
+      amount: amount,
+      type: Transaction::TYPES[:credit],
+      event: Transaction::EVENTS[:deposit]
+    )
+  end
+
+  def transfer!(destination_account, amount)
+    transaction do
+      transactions.create!(
+        amount: amount,
+        type: Transaction::TYPES[:debit],
+        event: Transaction::EVENTS[:transfer],
+        sender: self,
+        receiver: destination_account
+      )
+
+      destination_account.transactions.create!(
+        amount: amount,
+        type: Transaction::TYPES[:credit],
+        event: Transaction::EVENTS[:transfer],
+        sender: self,
+        receiver: destination_account
+      )
+    end
+  end
+
   def verify!
     update!(status: STATUSES[:verified])
   end
