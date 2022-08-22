@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_08_22_164613) do
+ActiveRecord::Schema.define(version: 2022_08_22_173057) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,11 +23,24 @@ ActiveRecord::Schema.define(version: 2022_08_22_164613) do
     t.integer "status", default: 0, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.bigint "balance_cents", default: 0, null: false
-    t.string "balance_currency", default: "AED", null: false
+    t.bigint "credit_cents", default: 0, null: false
+    t.string "credit_currency", default: "AED", null: false
+    t.bigint "debit_cents", default: 0, null: false
+    t.string "debit_currency", default: "AED", null: false
     t.index ["email"], name: "index_accounts_on_email"
     t.index ["phone_number"], name: "index_accounts_on_phone_number"
     t.index ["status"], name: "index_accounts_on_status"
   end
 
+  create_table "transactions", force: :cascade do |t|
+    t.bigint "account_id"
+    t.integer "type", null: false
+    t.bigint "amount_cents", default: 0, null: false
+    t.string "amount_currency", default: "AED", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["account_id"], name: "index_transactions_on_account_id"
+  end
+
+  add_foreign_key "transactions", "accounts"
 end
