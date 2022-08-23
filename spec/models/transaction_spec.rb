@@ -2,26 +2,30 @@
 
 # == Schema Information
 #
-# Table name: accounts
+# Table name: transactions
 #
 #  id              :bigint           not null, primary key
-#  credit_cents    :bigint           default(0), not null
-#  credit_currency :string           default("AED"), not null
-#  debit_cents     :bigint           default(0), not null
-#  debit_currency  :string           default("AED"), not null
-#  email           :string
-#  first_name      :string
-#  last_name       :string
-#  phone_number    :string
-#  status          :integer          default("pending"), not null
+#  amount_cents    :bigint           default(0), not null
+#  amount_currency :string           default("AED"), not null
+#  event           :integer          default("transfer"), not null
+#  type            :integer          not null
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
+#  account_id      :bigint
+#  receiver_id     :bigint
+#  sender_id       :bigint
 #
 # Indexes
 #
-#  index_accounts_on_email         (email)
-#  index_accounts_on_phone_number  (phone_number)
-#  index_accounts_on_status        (status)
+#  index_transactions_on_account_id   (account_id)
+#  index_transactions_on_receiver_id  (receiver_id)
+#  index_transactions_on_sender_id    (sender_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (account_id => accounts.id)
+#  fk_rails_...  (receiver_id => accounts.id)
+#  fk_rails_...  (sender_id => accounts.id)
 #
 require 'rails_helper'
 

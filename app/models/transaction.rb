@@ -74,7 +74,7 @@ class Transaction < ApplicationRecord
     return unless debit_type?
 
     account_balance = account.balance
-    errors.add(:amount, 'should be greater than or equal to current account balance') if (account_balance - amount).negative?
+    errors.add(:base, 'Transaction amount should be greater than or equal to current account balance') if (account_balance - amount).negative?
   end
 
   def sender_receiver

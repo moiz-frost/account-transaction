@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_08_22_184151) do
+ActiveRecord::Schema.define(version: 2022_08_23_154556) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -27,9 +27,21 @@ ActiveRecord::Schema.define(version: 2022_08_22_184151) do
     t.string "credit_currency", default: "AED", null: false
     t.bigint "debit_cents", default: 0, null: false
     t.string "debit_currency", default: "AED", null: false
+    t.string "encrypted_password", default: "", null: false
     t.index ["email"], name: "index_accounts_on_email"
     t.index ["phone_number"], name: "index_accounts_on_phone_number"
     t.index ["status"], name: "index_accounts_on_status"
+  end
+
+  create_table "sessions", force: :cascade do |t|
+    t.string "resource_type", null: false
+    t.bigint "resource_id", null: false
+    t.string "token", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["resource_type", "resource_id"], name: "index_sessions_on_resource_type_and_resource_id"
+    t.index ["token"], name: "index_sessions_on_token", unique: true
   end
 
   create_table "transactions", force: :cascade do |t|

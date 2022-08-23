@@ -4,18 +4,19 @@
 #
 # Table name: accounts
 #
-#  id              :bigint           not null, primary key
-#  credit_cents    :bigint           default(0), not null
-#  credit_currency :string           default("AED"), not null
-#  debit_cents     :bigint           default(0), not null
-#  debit_currency  :string           default("AED"), not null
-#  email           :string
-#  first_name      :string
-#  last_name       :string
-#  phone_number    :string
-#  status          :integer          default("pending"), not null
-#  created_at      :datetime         not null
-#  updated_at      :datetime         not null
+#  id                 :bigint           not null, primary key
+#  credit_cents       :bigint           default(0), not null
+#  credit_currency    :string           default("AED"), not null
+#  debit_cents        :bigint           default(0), not null
+#  debit_currency     :string           default("AED"), not null
+#  email              :string
+#  encrypted_password :string           default(""), not null
+#  first_name         :string
+#  last_name          :string
+#  phone_number       :string
+#  status             :integer          default("pending"), not null
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
 #
 # Indexes
 #
@@ -24,6 +25,8 @@
 #  index_accounts_on_status        (status)
 #
 class Account < ApplicationRecord
+  devise :database_authenticatable
+
   include FormattableCurrency
 
   STATUSES = {
@@ -49,6 +52,11 @@ class Account < ApplicationRecord
     scope key, -> { where(status: key) }
   end
 
+  scope :find_by_email, ->(email) { where(email: email) }
+  scope :find_by_phone_number, ->(phone_number) { where(phone_number: phone_number) }
+
+  before_validation :set_default_password, on: :create, if: ->(i) { i.password.blank? }
+
   def withdraw!(amount = 0)
     transactions.create!(
       amount: amount,
@@ -66,7 +74,7 @@ class Account < ApplicationRecord
   end
 
   def transfer!(destination_account, amount)
-    transaction do
+    with_lock do
       transactions.create!(
         amount: amount,
         type: Transaction::TYPES[:debit],
@@ -92,5 +100,11 @@ class Account < ApplicationRecord
   # we keep credit and debit amounts separately so that we can return the correct balance in one shot
   def balance
     credit - debit
+  end
+
+  private
+
+  def set_default_password
+    self.password = SecureRandom.uuid
   end
 end

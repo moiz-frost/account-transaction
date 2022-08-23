@@ -7,6 +7,8 @@ ruby '2.7.2'
 
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'counter_culture', '~> 2.0'
+gem 'devise'
+gem 'jwt'
 gem 'money-rails'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 4.1'
