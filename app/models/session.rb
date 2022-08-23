@@ -24,16 +24,19 @@ class Session < ApplicationRecord
 
   scope :active, -> { where('expires_at > ?', Time.current.utc) }
 
-  def self.authenticate(token)
-    Session.where(token: token).where('expires_at > ?', Time.current.utc).first
-  end
+  class << self
+    def authenticate(token)
+      Session.where(token: token).where('expires_at > ?', Time.current.utc).first
+    end
 
-  def self.generate_or_find_existing_session_for(resource)
-    session = Session.active.find_by(resource: resource)
-    if session.present?
-      session.update!(expires_at: DEFAULT_EXPIRATION_TIME.from_now, last_active_at: Time.current)
-    else
-      Session.create!(resource: user, expires_at: DEFAULT_APP_DAYS.from_now, last_active_at: Time.current)
+    def generate_or_find_existing_session_for(resource)
+      session = Session.active.find_by(resource: resource)
+      if session.present?
+        session.update!(expires_at: DEFAULT_EXPIRATION_TIME.from_now)
+      else
+        session = Session.create!(resource: resource, expires_at: DEFAULT_EXPIRATION_TIME.from_now)
+      end
+      session
     end
   end
 

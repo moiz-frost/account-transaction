@@ -55,7 +55,7 @@ class Account < ApplicationRecord
   scope :find_by_email, ->(email) { where(email: email) }
   scope :find_by_phone_number, ->(phone_number) { where(phone_number: phone_number) }
 
-  before_validation :set_default_password, on: :create, if: ->(i) { i.password.blank? }
+  before_validation :set_default_password, on: :create, if: ->(i) { i.encrypted_password.blank? }
 
   def withdraw!(amount = 0)
     transactions.create!(
@@ -105,6 +105,6 @@ class Account < ApplicationRecord
   private
 
   def set_default_password
-    self.password = SecureRandom.uuid
+    self.encrypted_password = SecureRandom.uuid
   end
 end

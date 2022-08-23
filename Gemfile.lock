@@ -288,6 +288,7 @@ GEM
       unicode-display_width (~> 1.1, >= 1.1.1)
     thor (1.1.0)
     thread_safe (0.3.6)
+    timecop (0.9.5)
     tzinfo (1.2.9)
       thread_safe (~> 0.1)
     unicode-display_width (1.7.0)
@@ -329,6 +330,7 @@ DEPENDENCIES
   shoulda-matchers
   spring
   spring-watcher-listen (~> 2.0.0)
+  timecop
   tzinfo-data
 
 RUBY VERSION
