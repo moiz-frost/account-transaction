@@ -1,9 +1,7 @@
 class CookieController < ApplicationController
-  # skip_before_action :verify_authenticity_token
-
   def login
     render json: { error: 'Please enter an email or phone number' }, status: :bad_request and return if params[:email].blank? && params[:phone_number].blank?
-    
+
     render json: { error: 'Password is not present' }, status: :bad_request and return if params[:password].blank?
 
     email = params[:email]

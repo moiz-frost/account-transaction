@@ -73,9 +73,31 @@ class Account < ApplicationRecord
     )
   end
 
+  def transfer(destination_account, amount)
+    with_lock do
+      transaction = transactions.create(
+        amount: amount,
+        type: Transaction::TYPES[:debit],
+        event: Transaction::EVENTS[:transfer],
+        sender: self,
+        receiver: destination_account
+      )
+
+      destination_account.transactions.create(
+        amount: amount,
+        type: Transaction::TYPES[:credit],
+        event: Transaction::EVENTS[:transfer],
+        sender: self,
+        receiver: destination_account
+      )
+
+      transaction
+    end
+  end
+
   def transfer!(destination_account, amount)
     with_lock do
-      transactions.create!(
+      transaction = transactions.create!(
         amount: amount,
         type: Transaction::TYPES[:debit],
         event: Transaction::EVENTS[:transfer],
@@ -90,6 +112,8 @@ class Account < ApplicationRecord
         sender: self,
         receiver: destination_account
       )
+
+      transaction
     end
   end
 
