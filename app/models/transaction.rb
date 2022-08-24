@@ -50,9 +50,9 @@ class Transaction < ApplicationRecord
 
   validates_presence_of :account, :type
 
-  validate :account_status
   validate :account_balance
   validate :sender_receiver
+  validate :account_verification
 
   monetize :amount_cents, numericality: { greater_than_or_equal_to: 0 }
   formats_money :amount
@@ -65,12 +65,6 @@ class Transaction < ApplicationRecord
   enum event: EVENTS, _suffix: true
 
   private
-
-  def account_status
-    return if account.verified_status?
-
-    errors.add(:account, 'is not verified')
-  end
 
   def account_balance
     return unless debit_type?
@@ -89,5 +83,11 @@ class Transaction < ApplicationRecord
     end
 
     errors.add(:base, 'Sender cannot be the receiver') if sender == receiver
+  end
+
+  def account_verification
+    return if account.verified_status?
+
+    errors.add(:account, 'is not verified')
   end
 end

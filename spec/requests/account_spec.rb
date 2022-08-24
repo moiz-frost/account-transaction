@@ -32,9 +32,11 @@ RSpec.describe 'Accounts', type: :request do
 
       expect(JSON.parse(response.body)).to match({
         errors: {
-          base: ['Transaction amount should be greater than or equal to current account balance'],
+          'test1@me.com': { base: ['Transaction amount should be greater than or equal to current account balance'] },
+          'test2@me.com': {},
         },
-      }.as_json)
+      }
+      .as_json)
     end
 
     it 'successfully retrieves transactions for account1' do
@@ -72,16 +74,30 @@ RSpec.describe 'Accounts', type: :request do
       )
     end
 
-    it 'fails to transfer money from account1 to account2 when either account is not verified' do
+    it 'fails to transfer money from account1 is unverified' do
+      @account1.update!(status: :unverified)
+
       post "/api/v1/accounts/#{@account1.id}/transfer", params: { amount: 50_000, email: 'test2@me.com' }
+
+      expect(response).to have_http_status(404)
+
+      expect(JSON.parse(response.body)).to match({ errors: 'Not found' }.as_json)
+    end
+
+    it 'fails to transfer money from account1 to account2 when account2 is not verified' do
+      @account2.update!(status: :unverified)
+
+      post "/api/v1/accounts/#{@account1.id}/transfer", params: { amount: 500, email: 'test2@me.com' }
 
       expect(response).to have_http_status(403)
 
       expect(JSON.parse(response.body)).to match({
         errors: {
-          base: ['Transaction amount should be greater than or equal to current account balance'],
+          'test1@me.com': {},
+          'test2@me.com': { account: ['is not verified'] },
         },
-      }.as_json)
+      }
+      .as_json)
     end
   end
 end

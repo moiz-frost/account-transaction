@@ -7,5 +7,9 @@ class Api::V1::BaseController < ::ApplicationController
 
   protected
 
+  def not_found
+    render json: { errors: 'Not found' }, status: :not_found
+  end
+
   def authenticate_account!; end
 end

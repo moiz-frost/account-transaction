@@ -85,7 +85,7 @@ class Account < ApplicationRecord
         receiver: destination_account
       )
 
-      destination_account.transactions.create(
+      destination_account_transaction = destination_account.transactions.create(
         amount: amount,
         type: Transaction::TYPES[:credit],
         event: Transaction::EVENTS[:transfer],
@@ -93,7 +93,7 @@ class Account < ApplicationRecord
         receiver: destination_account
       )
 
-      transaction
+      [transaction, destination_account_transaction]
     end
   end
 

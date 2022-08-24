@@ -5,11 +5,17 @@ module Api
 
       # POST /account/transfer
       def transfer
-        transaction = @account.transfer(receiver_account, transfer_params[:amount])
-        if transaction.save
-          render json: transaction, status: :created
+        transactions = @account.transfer(receiver_account, transfer_params[:amount])
+        if transactions.first.save && transactions.second.save
+          render json: transactions.first, status: :created
         else
-          render json: { errors: transaction.errors }, status: :forbidden
+          errors = {}
+          errors[account_email_or_phone_number] = transactions.first.errors.messages
+          errors[receiver_email_or_phone_number] = transactions.second.errors.messages
+
+          render json: {
+            errors: errors,
+          }, status: :forbidden
         end
       end
 
@@ -25,7 +31,20 @@ module Api
         @account = Account.verified.find(params[:id])
       end
 
-      # assumption is that receiver account will always exist
+      def account_email_or_phone_number
+        email = @account.email
+        phone_number = @account.phone_number
+
+        email || phone_number
+      end
+
+      def receiver_email_or_phone_number
+        email = transfer_params[:email]
+        phone_number = transfer_params[:phone_number]
+
+        email || phone_number
+      end
+
       def receiver_account
         email = transfer_params[:email]
         phone_number = transfer_params[:phone_number]
