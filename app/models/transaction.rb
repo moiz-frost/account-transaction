@@ -26,6 +26,7 @@
 #  fk_rails_...  (sender_id => accounts.id)
 #
 class Transaction < ApplicationRecord
+  # transaction is a reserved word
   self.inheritance_column = :_type_disabled
 
   include FormattableCurrency
@@ -56,6 +57,7 @@ class Transaction < ApplicationRecord
   monetize :amount_cents, numericality: { greater_than_or_equal_to: 0 }
   formats_money :amount
 
+  # cache counter ensures credits and debits are up to date all the time
   counter_culture :account, column_name: proc { |model| model.credit_type? ? :credit_cents : nil }, delta_column: :amount_cents
   counter_culture :account, column_name: proc { |model| model.debit_type? ? :debit_cents : nil }, delta_column: :amount_cents
 

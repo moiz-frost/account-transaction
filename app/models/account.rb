@@ -42,6 +42,7 @@ class Account < ApplicationRecord
   monetize :credit_cents, numericality: { greater_than_or_equal_to: 0 }
   monetize :debit_cents, numericality: { greater_than_or_equal_to: 0 }
 
+  # formats balance like "AED 501.5"
   formats_money :balance
 
   has_many :transactions
@@ -74,6 +75,7 @@ class Account < ApplicationRecord
   end
 
   def transfer(destination_account, amount)
+    # acquire an exclusive lock before updating
     with_lock do
       transaction = transactions.create(
         amount: amount,
@@ -96,6 +98,7 @@ class Account < ApplicationRecord
   end
 
   def transfer!(destination_account, amount)
+    # acquire an exclusive lock before updating
     with_lock do
       transaction = transactions.create!(
         amount: amount,
@@ -122,6 +125,7 @@ class Account < ApplicationRecord
   end
 
   # we keep credit and debit amounts separately so that we can return the correct balance in one shot
+  # we dont store it separately because balance is determined from the ledger which in our case are transactions
   def balance
     credit - debit
   end

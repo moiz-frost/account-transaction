@@ -18,6 +18,7 @@
 class Session < ApplicationRecord
   DEFAULT_EXPIRATION_TIME = 3.days.freeze
 
+  # maybe in the future we may have a user session?
   belongs_to :resource, polymorphic: true
 
   before_validation :set_token_and_expiration, on: :create
@@ -29,6 +30,7 @@ class Session < ApplicationRecord
       Session.where(token: token).where('expires_at > ?', Time.current.utc).first
     end
 
+    # helper method to retrieve current session or generate a new one if its expired
     def generate_or_find_existing_session_for(resource)
       session = Session.active.find_by(resource: resource)
       if session.present?

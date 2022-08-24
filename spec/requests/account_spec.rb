@@ -71,5 +71,17 @@ RSpec.describe 'Accounts', type: :request do
         ].as_json
       )
     end
+
+    it 'fails to transfer money from account1 to account2 when either account is not verified' do
+      post "/api/v1/accounts/#{@account1.id}/transfer", params: { amount: 50_000, email: 'test2@me.com' }
+
+      expect(response).to have_http_status(403)
+
+      expect(JSON.parse(response.body)).to match({
+        errors: {
+          base: ['Transaction amount should be greater than or equal to current account balance'],
+        },
+      }.as_json)
+    end
   end
 end
