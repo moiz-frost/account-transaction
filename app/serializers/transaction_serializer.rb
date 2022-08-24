@@ -1,5 +1,5 @@
 class TransactionSerializer < ActiveModel::Serializer
-  attributes :amount, :type, :event, :sender, :receiver
+  attributes :amount, :type, :event, :sender, :receiver, :time
 
   belongs_to :sender
   belongs_to :receiver
@@ -14,5 +14,9 @@ class TransactionSerializer < ActiveModel::Serializer
 
   def amount
     object.formatted_amount
+  end
+
+  def time
+    Formatters::DateFormater.format_with_time(object.created_at)
   end
 end

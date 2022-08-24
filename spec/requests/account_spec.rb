@@ -21,6 +21,7 @@ RSpec.describe 'Accounts', type: :request do
         event: 'transfer',
         sender: @account1.email,
         receiver: @account2.email,
+        time: Formatters::DateFormater.format_with_time(@account1.transactions.last.created_at),
       }.as_json)
     end
 
@@ -41,24 +42,32 @@ RSpec.describe 'Accounts', type: :request do
 
       expect(response).to have_http_status(200)
 
+      credit_time = Formatters::DateFormater.format_with_time(@account1.transactions.last.created_at)
+
       expect(JSON.parse(response.body)).to match(
         [
-          { amount: 'AED 5,000.00', type: 'credit', event: 'deposit', sender: '', receiver: '' }
+          { amount: 'AED 5,000.00', type: 'credit', event: 'deposit', sender: '', receiver: '', time: credit_time }
         ].as_json
       )
+
+      Timecop.freeze
 
       post "/api/v1/accounts/#{@account1.id}/transfer", params: { amount: 500, email: 'test2@me.com' }
       post "/api/v1/accounts/#{@account1.id}/transfer", params: { amount: 500, email: 'test2@me.com' }
       post "/api/v1/accounts/#{@account1.id}/transfer", params: { amount: 500, email: 'test2@me.com' }
+
+      transaction_time = Formatters::DateFormater.format_with_time(@account1.transactions.last.created_at)
+
+      Timecop.return
 
       get "/api/v1/accounts/#{@account1.id}/transactions"
 
       expect(JSON.parse(response.body)).to match(
         [
-          { amount: 'AED 5,000.00', type: 'credit', event: 'deposit', sender: '', receiver: '' },
-          { amount: 'AED 500.00', type: 'debit', event: 'transfer', sender: 'test1@me.com', receiver: 'test2@me.com' },
-          { amount: 'AED 500.00', type: 'debit', event: 'transfer', sender: 'test1@me.com', receiver: 'test2@me.com' },
-          { amount: 'AED 500.00', type: 'debit', event: 'transfer', sender: 'test1@me.com', receiver: 'test2@me.com' }
+          { amount: 'AED 5,000.00', type: 'credit', event: 'deposit', sender: '', receiver: '', time: credit_time },
+          { amount: 'AED 500.00', type: 'debit', event: 'transfer', sender: 'test1@me.com', receiver: 'test2@me.com', time: transaction_time },
+          { amount: 'AED 500.00', type: 'debit', event: 'transfer', sender: 'test1@me.com', receiver: 'test2@me.com', time: transaction_time },
+          { amount: 'AED 500.00', type: 'debit', event: 'transfer', sender: 'test1@me.com', receiver: 'test2@me.com', time: transaction_time }
         ].as_json
       )
     end
